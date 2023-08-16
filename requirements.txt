@@ -1,0 +1,16 @@
+ipywidgets
+numpy
+matplotlib
+pyarrow
+pandas
+pyodbc
+SQLalchemy
+pyarrow
+openpyxl
+polars
+seaborn
+ydata-profiling
+statsmodels
+networkx[default]
+tqdm
+python-dotenv
