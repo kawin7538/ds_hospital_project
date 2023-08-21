@@ -9,8 +9,12 @@ pyarrow
 openpyxl
 polars
 seaborn
+seaborn-qqplot
 ydata-profiling
 statsmodels
 networkx[default]
 tqdm
 python-dotenv
+pymc
+bambi
+scikit-learn
