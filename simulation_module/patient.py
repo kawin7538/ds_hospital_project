@@ -6,12 +6,40 @@ LIST_SPECIFICATION=[
     'need_laboratory',
     'need_radiology',
     'need_orthopedics',
+    'need_dermatology',
+    'need_neurology',
+    'need_dental',
+    'need_ophthalmology',
+    'need_otolaryngology',
+    'need_thoracic',
+    'need_hematology',
+    'need_gi_liver',
+    'need_gynaecology',
+    'need_nephrology',
+    'need_or',
+    'need_ipd',
+    'need_physical_therapy',
+    'need_pharmacy'
 ]
 
 LIST_SPECIFICATION_IN_DF=[
     'need_lab',
     'need_radio',
     'need_orthopedics',
+    'need_dermatology',
+    'need_neurology',
+    'need_dental',
+    'need_ophthalmology',
+    'need_otolaryngology',
+    'need_thoracic_department',
+    'need_hematology',
+    'need_gi_liver_department',
+    'need_gynaecology',
+    'need_nephrology_department',
+    'need_or_room',
+    'need_ipd_stay',
+    'need_physical_theraputic_room',
+    'need_pharmacy'
 ]
 
 opd_final_df=pd.read_parquet("input_data/opd_final_df.parquet")
