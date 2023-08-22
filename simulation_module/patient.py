@@ -3,11 +3,15 @@ import numpy as np
 import pandas as pd
 
 LIST_SPECIFICATION=[
-    'need_laboratory'
+    'need_laboratory',
+    'need_radiology',
+    'need_orthopedics',
 ]
 
 LIST_SPECIFICATION_IN_DF=[
-    'need_lab'
+    'need_lab',
+    'need_radio',
+    'need_orthopedics',
 ]
 
 opd_final_df=pd.read_parquet("input_data/opd_final_df.parquet")
