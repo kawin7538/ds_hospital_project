@@ -44,7 +44,7 @@ AVG_IPD_USAGE=1440*5
 AVG_PHYSICAL_THERAPY_USAGE=60*3
 AVG_PHARMACY_USAGE=3
 
-SIM_TIME=31*24*60
+SIM_TIME=365*24*60
 START_DATETIME=datetime(year=2022,month=1,day=1)
 
 arrival_rate_df=pd.read_parquet("output/minutely_patient_arrival_rate_display_hourly.parquet")

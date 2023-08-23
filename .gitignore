@@ -180,4 +180,4 @@ Backup of *.doc*
 *.~vsd*
 
 input_data/
-output/temp_dict_time_recorder.json
+output/base_simulation_results/
