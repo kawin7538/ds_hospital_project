@@ -50,6 +50,8 @@ class Patient:
         
         self.random_patient=np.random.choice([True,False],p=[(471306-133074)/471306,133074/471306])
 
+        self.actual_process_time=None
+
         self.specification=dict()
 
         self._define_specification()
@@ -64,3 +66,4 @@ class Patient:
             for idx, col_df in zip(LIST_SPECIFICATION,LIST_SPECIFICATION_IN_DF):
                 self.specification[idx]=temp_specification[col_df].values[0]
                 # self.specification[idx]=True
+            self.actual_process_time=temp_specification['elapsed_time_in_minutes'].values[0]

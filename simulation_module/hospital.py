@@ -240,6 +240,10 @@ class Hospital:
     def attend_laststep(self,patient:Patient,last_process):
         yield last_process
         self.time_recorder[patient.patient_id]['VN_OUT']=START_DATETIME+timedelta(minutes=self.env.now)
+        self.time_recorder[patient.patient_id]['random_patient']=patient.random_patient
+        if not patient.random_patient:
+            self.time_recorder[patient.patient_id]['actual_process_time']=patient.actual_process_time
+            self.time_recorder[patient.patient_id]['actual_process_time']=self.time_recorder[patient.patient_id]['VN_OUT']-self.time_recorder[patient.patient_id]['VN_IN']
 
     def run(self):
         self.env.process(self.generate_patient_arrivals())
