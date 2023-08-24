@@ -25,27 +25,27 @@ NUM_IPD_DEPARTMENT=400
 NUM_PHYSICAL_THERAPY_DEPARTMENT=1
 NUM_PHARMACY_DEPARTMENT=1
 
-AVG_OPD_USAGE=10
+AVG_OPD_USAGE=15
 AVG_LABORATORY_USAGE=120
-AVG_RADIOLOGY_USAGE=10
-AVG_ORTHOPEDIC_USAGE=15
-AVG_DERMATOLOGY_USAGE=20
+AVG_RADIOLOGY_USAGE=50.242355
+AVG_ORTHOPEDIC_USAGE=11.190809
+AVG_DERMATOLOGY_USAGE=13.065031
 AVG_NEUROLOGY_USAGE=30
-AVG_DENTAL_USAGE=45
-AVG_OPHTHALMOLOGY_USAGE=25
-AVG_OTOLARYNGOLOGY_USAGE=15
-AVG_THORACIC_USAGE=20
+AVG_DENTAL_USAGE=31.856829
+AVG_OPHTHALMOLOGY_USAGE=33.430458
+AVG_OTOLARYNGOLOGY_USAGE=18.843546
+AVG_THORACIC_USAGE=23.66695
 AVG_HEMATOLOGY_USAGE=60
-AVG_GI_LIVER_USAGE=30
-AVG_GYNAECOLOGY_USAGE=25
-AVG_NEPHROLOGY_USAGE=60
-AVG_OPERATING_ROOM_USAGE=60*5
+AVG_GI_LIVER_USAGE=12.282339
+AVG_GYNAECOLOGY_USAGE=30.360632
+AVG_NEPHROLOGY_USAGE=22.84473
+AVG_OPERATING_ROOM_USAGE=60*4
 AVG_IPD_USAGE=1440*5
 AVG_PHYSICAL_THERAPY_USAGE=60*3
-AVG_PHARMACY_USAGE=3
+AVG_PHARMACY_USAGE=10
 
 SIM_TIME=365*24*60
-START_DATETIME=datetime(year=2022,month=1,day=1)
+START_DATETIME=datetime(year=2022,month=1,day=1,hour=0,minute=0,second=0,microsecond=0)
 
 arrival_rate_df=pd.read_parquet("output/minutely_patient_arrival_rate_display_hourly.parquet")
 
@@ -91,7 +91,8 @@ class Hospital:
 
             self.time_recorder[patient.patient_id]=dict()
 
-            self.time_recorder[patient.patient_id]['VN_IN']=START_DATETIME+timedelta(minutes=self.env.now)
+            self.time_recorder[patient.patient_id]['random_patient']=patient.random_patient
+            self.time_recorder[patient.patient_id]['VN_IN']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
 
             opd_process=self.env.process(self.attend_opd(patient=patient))
             laboratory_process=self.env.process(self.attend_laboratory(patient=patient,opd_process=opd_process))
@@ -159,8 +160,9 @@ class Hospital:
     def attend_opd(self,patient:Patient):
         
         # print(f"Patient {patient.patient_id} started OPD queuing at {START_DATETIME+timedelta(minutes=self.env.now)}")
-        self.time_recorder[patient.patient_id]['datetime_opd_queuing']=START_DATETIME+timedelta(minutes=self.env.now)
+        self.time_recorder[patient.patient_id]['datetime_opd_queuing']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
         self.time_recorder[patient.patient_id]['length_inqueue_opd']=len(self.opd_department.queue)
+        self.time_recorder[patient.patient_id]['opd_count_inuse']=self.opd_department.count
 
         with self.opd_department.request() as req:
 
@@ -173,14 +175,14 @@ class Hospital:
                 continue;
 
             # print(f"Patient {patient.patient_id} started OPD at {START_DATETIME+timedelta(minutes=self.env.now)}")
-            self.time_recorder[patient.patient_id]['datetime_opd']=START_DATETIME+timedelta(minutes=self.env.now)
+            self.time_recorder[patient.patient_id]['datetime_opd']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
 
             sampled_opd_usage=random.expovariate(1.0/AVG_OPD_USAGE)
 
             yield self.env.timeout(sampled_opd_usage)
 
             # print(f"Patient {patient.patient_id} finished OPD at {START_DATETIME+timedelta(minutes=self.env.now)}")
-            self.time_recorder[patient.patient_id]['datetime_opd_finished']=START_DATETIME+timedelta(minutes=self.env.now)
+            self.time_recorder[patient.patient_id]['datetime_opd_finished']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
 
     def attend_laboratory(self, patient:Patient, opd_process):
         yield opd_process
@@ -191,22 +193,23 @@ class Hospital:
 
         else:
 
-            self.time_recorder[patient.patient_id]['datetime_laboratory_queuing']=START_DATETIME+timedelta(minutes=self.env.now)
+            self.time_recorder[patient.patient_id]['datetime_laboratory_queuing']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
             self.time_recorder[patient.patient_id]['length_inqueue_laboratory']=len(self.laboratory_department.queue)
+            self.time_recorder[patient.patient_id]['laboratory_count_inuse']=self.laboratory_department.count
 
             with self.laboratory_department.request() as req:
                 
                 yield req
 
                 # print(f"Patient {patient.patient_id} started LAB at {START_DATETIME+timedelta(minutes=self.env.now)}")
-                self.time_recorder[patient.patient_id]['datetime_laboratory']=START_DATETIME+timedelta(minutes=self.env.now)
+                self.time_recorder[patient.patient_id]['datetime_laboratory']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
 
                 sampled_laboratory_usage=random.expovariate(1.0/AVG_LABORATORY_USAGE)
 
                 yield self.env.timeout(sampled_laboratory_usage)
 
                 # print(f"Patient {patient.patient_id} finished LAB at {START_DATETIME+timedelta(minutes=self.env.now)}")
-                self.time_recorder[patient.patient_id]['datetime_laboratory_finished']=START_DATETIME+timedelta(minutes=self.env.now)
+                self.time_recorder[patient.patient_id]['datetime_laboratory_finished']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
 
     def basic_process_template_function(self,specification:str,keyword:str,department:simpy.Resource, avg_time_usage):
         def basic_process_function(patient:Patient,previous_process):
@@ -218,32 +221,32 @@ class Hospital:
 
             else:
 
-                self.time_recorder[patient.patient_id][f'datetime_{keyword}_queuing']=START_DATETIME+timedelta(minutes=self.env.now)
+                self.time_recorder[patient.patient_id][f'datetime_{keyword}_queuing']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
                 self.time_recorder[patient.patient_id][f'length_inqueue_{keyword}']=len(department.queue)
+                self.time_recorder[patient.patient_id][f'{keyword}_count_inuse']=department.count
 
                 with department.request() as req:
                     
                     yield req
 
                     # print(f"Patient {patient.patient_id} started LAB at {START_DATETIME+timedelta(minutes=self.env.now)}")
-                    self.time_recorder[patient.patient_id][f'datetime_{keyword}']=START_DATETIME+timedelta(minutes=self.env.now)
+                    self.time_recorder[patient.patient_id][f'datetime_{keyword}']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
 
                     sampled_usage=random.expovariate(1.0/avg_time_usage)
 
                     yield self.env.timeout(sampled_usage)
 
                     # print(f"Patient {patient.patient_id} finished LAB at {START_DATETIME+timedelta(minutes=self.env.now)}")
-                    self.time_recorder[patient.patient_id][f'datetime_{keyword}_finished']=START_DATETIME+timedelta(minutes=self.env.now)
+                    self.time_recorder[patient.patient_id][f'datetime_{keyword}_finished']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
         
         return basic_process_function
 
     def attend_laststep(self,patient:Patient,last_process):
         yield last_process
-        self.time_recorder[patient.patient_id]['VN_OUT']=START_DATETIME+timedelta(minutes=self.env.now)
-        self.time_recorder[patient.patient_id]['random_patient']=patient.random_patient
+        self.time_recorder[patient.patient_id]['VN_OUT']=(START_DATETIME+timedelta(minutes=self.env.now)).strftime("%Y-%m-%d %H:%M:%S")
         if not patient.random_patient:
             self.time_recorder[patient.patient_id]['actual_process_time']=patient.actual_process_time
-            self.time_recorder[patient.patient_id]['actual_process_time']=self.time_recorder[patient.patient_id]['VN_OUT']-self.time_recorder[patient.patient_id]['VN_IN']
+            self.time_recorder[patient.patient_id]['simulate_process_time']=datetime.strptime(self.time_recorder[patient.patient_id]['VN_OUT'], "%Y-%m-%d %H:%M:%S")-datetime.strptime(self.time_recorder[patient.patient_id]['VN_IN'],"%Y-%m-%d %H:%M:%S")
 
     def run(self):
         self.env.process(self.generate_patient_arrivals())
